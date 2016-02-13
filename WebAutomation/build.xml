@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Sample Ant build" basedir="." default="zip">
+	<!-- ========== Initialize Properties =================================== -->
+	<!-- set global properties for build -->
+	<property name="basedir" value="." />
+	<property name="selenium-lib" value="${basedir}/lib/Selenium" />
+	<property name="excel-lib" value="${basedir}/lib/excel" />
+	<property name="extendReport-lib" value="${basedir}/lib/ExtendReport" />
+	<property name="reportNG-lib" value="${basedir}/lib/ReportNG" />
+	<property name="src" value="${basedir}/src" />
+	<property name="bin" value="${basedir}/bin" />
+	<property name="report-dir" value="${basedir}/test-output" />
+
+	<!-- ====== Set the classpath ==== -->
+	<path id="classpath">
+		<pathelement location="${bin}" />
+		<fileset dir="${selenium-lib}">
+			<include name="*.jar" />
+		</fileset>
+
+		<fileset dir="${reportNG-lib}">
+			<include name="*.jar" />
+		</fileset>
+
+		<fileset dir="${excel-lib}">
+			<include name="*.jar" />
+		</fileset>
+	</path>
+
+	<!-- Delete directories -->
+	<target name="delete-dir">
+		<delete dir="${bin}" />
+		<delete dir="${report-dir}" />
+	</target>
+
+	<!-- Creating directories -->
+	<target name="create" depends="delete-dir">
+		<mkdir dir="${bin}" />
+		<mkdir dir="${report-dir}" />
+	</target>
+
+	<!-- Compile the java code from ${src} into ${bin} -->
+	<target name="compile" depends="create">
+		<javac srcdir="${src}" classpathref="classpath"
+			includeAntRuntime="No" destdir="${bin}" />
+		<echo> /* Compiled Directory Classes */ </echo>
+	</target>
+
+	<!-- Runs the file using TestNG -->
+	<taskdef resource="testngtasks" classpath="lib/Selenium/testng-6.8.5.jar" />
+
+
+	<target name="testng-execution" depends="compile">
+		<mkdir dir="${report-dir}" />
+		<testng outputdir="${report-dir}" classpathref="classpath"
+			useDefaultListeners="true">
+			<propertyset>
+				<propertyref builtin="commandline" />
+			</propertyset>
+			<xmlfileset dir="${basedir}/config" includes="testng.xml" />
+		</testng>
+	</target>
+	
+	<!-- Generates and Zip Reportng report for TestNG -->
+	
+	<target name="clean" depends="testng-execution">
+		<delete file="${basedir}/img/report.zip" />
+	</target>
+
+	<target name="zip" depends="clean">
+		<zip destfile="${basedir}/img/report.zip" basedir="${basedir}/test-output" excludes="dont*.*" />
+	</target>
+</project>
