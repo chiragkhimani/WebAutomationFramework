@@ -1,18 +1,20 @@
 package com.automation.Utilities;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeSuite;
-import org.testng.annotations.BeforeTest;
 
 public class DriverUtility {
 
@@ -148,5 +150,54 @@ public class DriverUtility {
 	public List<WebElement> getElementListByCSS(String CSS) {
 		waitForElementPresent("CSS", CSS);
 		return driver.findElements(By.cssSelector(CSS));
+	}
+
+	/**
+	 * Open Link in new window
+	 * 
+	 * @param element
+	 * @return
+	 */
+
+	public String openLinkInNewWindow(WebElement element) {
+		Actions actionOpenLinkInNewTab = new Actions(driver);
+		actionOpenLinkInNewTab.moveToElement(element).keyDown(Keys.COMMAND)
+				.keyDown(Keys.SHIFT).click(element).keyUp(Keys.COMMAND)
+				.keyUp(Keys.SHIFT).perform();
+		ArrayList<String> tabs = new ArrayList<String>(
+				driver.getWindowHandles());
+		driver.switchTo().window(tabs.get(1));
+		return tabs.get(0);
+	}
+
+	/**
+	 * This is used to check element is present or not
+	 * 
+	 * @param locator
+	 * @return
+	 */
+	public boolean isPresent(String locator) {
+		try {
+			driver.findElement(By.cssSelector(locator));
+			return true;
+		} catch (Exception e) {
+			return false;
+		}
+	}
+
+	/**
+	 * This is used to switch to new window
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
+
+	public String switchToNewWindow() throws Exception {
+		String winHandleBefore = getDriver().getWindowHandle();
+		Thread.sleep(5000);
+		for (String winHandle : getDriver().getWindowHandles()) {
+			getDriver().switchTo().window(winHandle);
+		}
+		return winHandleBefore;
 	}
 }
