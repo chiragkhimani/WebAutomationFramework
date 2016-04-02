@@ -19,17 +19,28 @@ public class DataPropertyReader {
 	private static boolean isTestFailed;
 	private String assertTextPass;
 	private String assertTextFail;
+	Properties properties;
+	
 
 	public DataPropertyReader() {
-		loadProperties("resources\\data.properties");
+		System.out.println(System.getProperty("user.dir")+"\\resources\\data.properties");
+		 properties = loadProperties(System.getProperty("user.dir")+"\\resources\\data.properties");
+	}
+	
+	
+	public String getProperty(String key) {
+		String value = properties.getProperty(key);
+		return value;
 	}
 
-	public void loadProperties(String propPath) {
+
+	public Properties loadProperties(String propPath) {
 		Properties properties = new Properties();
 		InputStream input = null;
 
 		try {
 			input = new FileInputStream(propPath);
+			System.out.println("---->"+input);
 			properties.load(input);
 			assertElementVisiblePassMsg = properties
 					.getProperty("element.visible.msg.pass");
@@ -47,6 +58,7 @@ public class DataPropertyReader {
 		} catch (IOException ex) {
 			ex.printStackTrace();
 		}
+		return properties;
 	}
 
 	public String getAssertTextFail() {
