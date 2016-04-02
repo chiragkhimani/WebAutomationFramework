@@ -2,6 +2,7 @@ package com.automation.Utilities;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.DateFormat;
@@ -66,7 +67,6 @@ public class CommonUtility extends DriverUtility {
 	 * @throws Exception
 	 */
 	public void sendMail() {
-
 		zipFolder(System.getProperty("user.dir") + "\\test-output",
 				System.getProperty("user.dir") + "\\img\\report.zip");
 		Properties props = new Properties();
@@ -81,8 +81,9 @@ public class CommonUtility extends DriverUtility {
 		Session session = Session.getDefaultInstance(props,
 				new javax.mail.Authenticator() {
 					protected PasswordAuthentication getPasswordAuthentication() {
-						return new PasswordAuthentication(
-								"Email", "Password");
+						return new PasswordAuthentication(dataProperties
+								.getProperty("email.username"), dataProperties
+								.getProperty("email.password"));
 					}
 				});
 
@@ -98,9 +99,10 @@ public class CommonUtility extends DriverUtility {
 			multipart.addBodyPart(messageBodyPart2);
 
 			Message message = new MimeMessage(session);
-			message.setFrom(new InternetAddress("khimanichirag@yahoo.in"));
-			message.setRecipients(Message.RecipientType.TO,
-					InternetAddress.parse("khimanichirag@gmail.com"));
+			message.setFrom(new InternetAddress(dataProperties
+					.getProperty("from.email")));
+			message.setRecipients(Message.RecipientType.TO, InternetAddress
+					.parse(dataProperties.getProperty("to.email")));
 			message.setSubject("Testing Subject");
 			message.setText("Dear Mail Crawler,"
 					+ "\n\n No spam to my email, please!");
@@ -206,24 +208,33 @@ public class CommonUtility extends DriverUtility {
 	 */
 	public String[][] getExcelData(String fileName) {
 		String[][] arrayExcelData = null;
+		File file = new File(fileName);
+
+		FileInputStream inputStream;
 		try {
-			XSSFWorkbook workBook = new XSSFWorkbook(fileName);
+			inputStream = new FileInputStream(file);
+			XSSFWorkbook workBook = new XSSFWorkbook(inputStream);
 			XSSFSheet sh = workBook.getSheetAt(0);
-			int totalNoOfCols = 1;
+
+			int totalNoOfCols = sh.getRow(1).getLastCellNum();
 			int totalNoOfRows = sh.getLastRowNum();
 			arrayExcelData = new String[totalNoOfRows][totalNoOfCols];
 			for (int i = 1; i <= totalNoOfRows; i++) {
-				System.out.println(i);
+
 				for (int j = 0; j < totalNoOfCols; j++) {
-					System.out.println(j);
-					arrayExcelData[i - 1][j] = sh.getRow(i).getCell(j)
-							.toString();
+					if (sh.getRow(i).getCell(j) != null) {
+						arrayExcelData[i - 1][j] = sh.getRow(i).getCell(j)
+								.toString();
+					} else {
+						arrayExcelData[i - 1][j] = null;
+					}
 				}
 			}
 			workBook.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+
 		return arrayExcelData;
 	}
 
@@ -271,6 +282,14 @@ public class CommonUtility extends DriverUtility {
 
 	}
 
+	/**
+	 * Add any file into zip
+	 * 
+	 * @param path
+	 * @param srcFile
+	 * @param zip
+	 * @throws Exception
+	 */
 	static private void addFileToZip(String path, String srcFile,
 			ZipOutputStream zip) throws Exception {
 
@@ -290,6 +309,14 @@ public class CommonUtility extends DriverUtility {
 
 	}
 
+	/**
+	 * Add any folder to zip
+	 * 
+	 * @param path
+	 * @param srcFolder
+	 * @param zip
+	 * @throws Exception
+	 */
 	static private void addFolderToZip(String path, String srcFolder,
 			ZipOutputStream zip) throws Exception {
 		File folder = new File(srcFolder);
