@@ -2,7 +2,6 @@ package com.automation.Utilities;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.DateFormat;
@@ -83,7 +82,7 @@ public class CommonUtility extends DriverUtility {
 				new javax.mail.Authenticator() {
 					protected PasswordAuthentication getPasswordAuthentication() {
 						return new PasswordAuthentication(
-								"khimanichirag@yahoo.in", "9723390588");
+								"Email", "Password");
 					}
 				});
 
